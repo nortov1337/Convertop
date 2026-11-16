@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Convertop — конвертер файлов</title>
+  <title>Convertop — file converter</title>
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
@@ -22,8 +22,8 @@
 
   <main class="container">
     <section class="hero">
-      <h1 class="hero-title">Конвертируйте файлы <span class="grad">мгновенно</span></h1>
-      <p class="hero-sub">Изображения, аудио, видео, документы, данные и архивы — без установки программ</p>
+      <h1 class="hero-title">Convert files <span class="grad">instantly</span></h1>
+      <p class="hero-sub">Images, audio, video, documents, data and archives — no software to install</p>
     </section>
 
     <section class="card dropzone" id="dropzone">
@@ -36,8 +36,8 @@
             <path d="M9.5 14.5 12 12l2.5 2.5" />
           </svg>
         </div>
-        <p class="dz-title">Перетащите файл сюда</p>
-        <p class="dz-sub">или нажмите, чтобы выбрать</p>
+        <p class="dz-title">Drop a file here</p>
+        <p class="dz-sub">or click to browse</p>
       </div>
     </section>
 
@@ -51,11 +51,11 @@
           <span class="file-name" id="fileName"></span>
         </div>
         <span class="file-meta" id="fileMeta"></span>
-        <button class="link" id="resetBtn">Сбросить</button>
+        <button class="link" id="resetBtn">Reset</button>
       </div>
 
       <div class="quality hidden" id="qualityRow">
-        <label for="quality">Качество</label>
+        <label for="quality">Quality</label>
         <input type="range" id="quality" min="1" max="100" value="90" />
         <span class="quality-value" id="qualityValue">90</span>
       </div>
@@ -63,7 +63,7 @@
       <div class="targets" id="targets"></div>
 
       <button class="primary" id="convertBtn" disabled>
-        <span class="btn-label">Конвертировать</span>
+        <span class="btn-label">Convert</span>
         <span class="btn-spinner" aria-hidden="true"></span>
       </button>
       <div class="status hidden" id="status"></div>
@@ -74,11 +74,11 @@
         <circle class="check-circle" cx="26" cy="26" r="24" fill="none" />
         <path class="check-mark" fill="none" d="M14 27l8 8 16-16" />
       </svg>
-      <p class="result-ok">Готово</p>
+      <p class="result-ok">Done</p>
       <p class="result-name" id="resultName"></p>
       <div class="result-actions">
-        <a class="primary" id="downloadLink" download>Скачать файл</a>
-        <button class="link" id="againBtn">Конвертировать ещё</button>
+        <a class="primary" id="downloadLink" download>Download file</a>
+        <button class="link" id="againBtn">Convert another</button>
       </div>
     </section>
   </main>

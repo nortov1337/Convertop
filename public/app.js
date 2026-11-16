@@ -26,10 +26,10 @@ let currentTarget = null;
 let categoryLabels = {};
 
 function humanSize(bytes) {
-  if (bytes < 1024) return `${bytes} Б`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} КБ`;
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} МБ`;
-  return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} ГБ`;
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`;
 }
 
 function extOf(name) {
@@ -49,7 +49,7 @@ async function boot() {
     const data = await res.json();
     categoryLabels = Object.fromEntries((data.categories ?? []).map((c) => [c.id, c.label]));
   } catch {
-    setStatus(els.status, 'Не удалось связаться с сервером', true);
+    setStatus(els.status, 'Could not reach the server', true);
   }
 }
 
@@ -73,7 +73,7 @@ async function loadTargets(ext) {
   try {
     const res = await fetch(`/api/targets?from=${encodeURIComponent(ext)}`);
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Неизвестный формат');
+    if (!res.ok) throw new Error(data.error || 'Unknown format');
     renderTargets(data);
   } catch (err) {
     setStatus(els.status, err.message, true);
@@ -97,7 +97,7 @@ function renderTargets(data) {
   }
 
   if (data.action) {
-    buttons.push(`<div class="target-group-label">Архив</div>`);
+    buttons.push(`<div class="target-group-label">Archive</div>`);
     buttons.push(`<button class="target-btn" data-ext="${data.action.id}">${data.action.label}</button>`);
   }
 
@@ -120,9 +120,9 @@ async function convert() {
   if (!currentFile || !currentTarget) return;
   els.convertBtn.disabled = true;
   els.convertBtn.classList.add('loading');
-  els.convertBtn.querySelector('.btn-label').textContent = 'Конвертация…';
+  els.convertBtn.querySelector('.btn-label').textContent = 'Converting…';
   els.status.classList.remove('hidden');
-  setStatus(els.status, 'Обработка файла…');
+  setStatus(els.status, 'Processing file…');
 
   const form = new FormData();
   form.append('file', currentFile);
@@ -135,7 +135,7 @@ async function convert() {
     const res = await fetch('/api/convert', { method: 'POST', body: form });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      throw new Error(data.error || `Ошибка ${res.status}`);
+      throw new Error(data.error || `Error ${res.status}`);
     }
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
@@ -150,7 +150,7 @@ async function convert() {
   } finally {
     els.convertBtn.disabled = false;
     els.convertBtn.classList.remove('loading');
-    els.convertBtn.querySelector('.btn-label').textContent = 'Конвертировать';
+    els.convertBtn.querySelector('.btn-label').textContent = 'Convert';
   }
 }
 

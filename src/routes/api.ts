@@ -53,7 +53,7 @@ apiRouter.get('/targets', (req, res) => {
     from,
     category: categoryOf(from),
     targets: targets.map((ext) => ({ ext, label: labelOf(ext), category: categoryOf(ext), mime: mimeOf(ext) })),
-    action: action ? { id: action, label: 'Извлечь содержимое' } : null,
+    action: action ? { id: action, label: 'Extract contents' } : null,
   });
 });
 

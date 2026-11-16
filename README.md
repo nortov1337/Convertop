@@ -1,37 +1,37 @@
 # Convertop
 
-Самодостаточный конвертер файлов: веб-интерфейс с drag-and-drop и REST API. Конвертация выполняется локально на сервере, файлы удаляются автоматически.
+Self-hosted file converter: a drag-and-drop web interface and a REST API. Conversion runs locally on the server, and files are deleted automatically.
 
-## Возможности
+## Features
 
-| Категория | Форматы | Движок |
+| Category | Formats | Engine |
 | --- | --- | --- |
-| Изображения | PNG, JPG, WebP, GIF, AVIF, TIFF, SVG → | sharp (без системных зависимостей) |
-| Аудио | MP3, WAV, OGG, FLAC, M4A, AAC, Opus | FFmpeg |
-| Видео | MP4, WebM, MOV, AVI, MKV, GIF (+ извлечение аудио) | FFmpeg |
-| Документы | DOCX, HTML, MD, TXT, RTF, ODT, EPUB, PDF | Pandoc + LibreOffice |
-| Данные | CSV, JSON, XLSX | exceljs / csv |
-| Архивы | ZIP, TAR, GZ (упаковка и извлечение) | archiver / unzipper / tar-stream |
+| Images | PNG, JPG, WebP, GIF, AVIF, TIFF, SVG → | sharp (no system dependencies) |
+| Audio | MP3, WAV, OGG, FLAC, M4A, AAC, Opus | FFmpeg |
+| Video | MP4, WebM, MOV, AVI, MKV, GIF (+ audio extraction) | FFmpeg |
+| Documents | DOCX, HTML, MD, TXT, RTF, ODT, EPUB, PDF | Pandoc + LibreOffice |
+| Data | CSV, JSON, XLSX | exceljs / csv |
+| Archives | ZIP, TAR, GZ (pack and extract) | archiver / unzipper / tar-stream |
 | PDF | → PNG, TXT, DOCX | pdf-to-png-converter / unpdf / LibreOffice |
 
-## Запуск
+## Running
 
 ```bash
 npm install
-npm run dev        # разработка (tsx watch)
-npm run build      # сборка в dist/
-npm start          # продакшн на :3000
+npm run dev        # development (tsx watch)
+npm run build      # build to dist/
+npm start          # production on :3000
 ```
 
-Откройте http://localhost:3000.
+Open http://localhost:3000.
 
-### Системные зависимости
+### System dependencies
 
-- **FFmpeg** — аудио/видео (на Windows: скачать с ffmpeg.org и добавить в PATH).
-- **Pandoc** — документы (pandoc.org/installing.html).
-- **LibreOffice** — экспорт в PDF и обратно (libreoffice.org).
+- **FFmpeg** — audio/video (on Windows: download from ffmpeg.org and add to PATH).
+- **Pandoc** — documents (pandoc.org/installing.html).
+- **LibreOffice** — export to PDF and back (libreoffice.org).
 
-Изображения, данные, архивы и PDF→PNG/TXT работают без этих инструментов. Доступные движки видны на `GET /api/health`.
+Images, data, archives and PDF→PNG/TXT work without these tools. Available engines are reported by `GET /api/health`.
 
 ## Docker (Linux)
 
@@ -40,20 +40,20 @@ docker build -t convertop .
 docker run -p 3000:3000 convertop
 ```
 
-Образ уже включает FFmpeg, Pandoc и LibreOffice.
+The image already includes FFmpeg, Pandoc and LibreOffice.
 
 ## API
 
-- `GET /api/health` — статус и доступные движки.
-- `GET /api/formats` — категории форматов.
-- `GET /api/targets?from=png` — список целевых форматов для расширения.
-- `POST /api/convert` — multipart: `file`, `to`, опционально `quality` (1–100). Возвращает файл.
+- `GET /api/health` — status and available engines.
+- `GET /api/formats` — format categories.
+- `GET /api/targets?from=png` — list of target formats for an extension.
+- `POST /api/convert` — multipart: `file`, `to`, optionally `quality` (1–100). Returns the file.
 
-## Переменные окружения
+## Environment variables
 
-| Переменная | По умолчанию | Описание |
+| Variable | Default | Description |
 | --- | --- | --- |
-| `PORT` | `3000` | Порт |
-| `MAX_UPLOAD_BYTES` | `524288000` | Максимальный размер файла |
-| `CONVERT_TIMEOUT_MS` | `900000` | Таймаут конвертации |
-| `TEMP_TTL_MS` | `3600000` | Время жизни временных файлов |
+| `PORT` | `3000` | Port |
+| `MAX_UPLOAD_BYTES` | `524288000` | Maximum file size |
+| `CONVERT_TIMEOUT_MS` | `900000` | Conversion timeout |
+| `TEMP_TTL_MS` | `3600000` | Temporary file lifetime |

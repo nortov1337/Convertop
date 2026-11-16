@@ -6,12 +6,12 @@ export interface CategoryInfo {
 }
 
 export const CATEGORIES: CategoryInfo[] = [
-  { id: 'image', label: 'Изображения' },
-  { id: 'audio', label: 'Аудио' },
-  { id: 'video', label: 'Видео' },
-  { id: 'document', label: 'Документы' },
-  { id: 'data', label: 'Данные' },
-  { id: 'archive', label: 'Архивы' },
+  { id: 'image', label: 'Images' },
+  { id: 'audio', label: 'Audio' },
+  { id: 'video', label: 'Video' },
+  { id: 'document', label: 'Documents' },
+  { id: 'data', label: 'Data' },
+  { id: 'archive', label: 'Archives' },
   { id: 'pdf', label: 'PDF' },
 ];
 
