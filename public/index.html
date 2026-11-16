@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Convertop — конвертер файлов</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Convertop</div>
+    <div class="engines" id="engines"></div>
+  </header>
+
+  <main class="container">
+    <section class="card dropzone" id="dropzone">
+      <input type="file" id="fileInput" hidden />
+      <div class="dz-content">
+        <div class="dz-icon">⇪</div>
+        <p class="dz-title">Перетащите файл сюда</p>
+        <p class="dz-sub">или нажмите, чтобы выбрать</p>
+      </div>
+    </section>
+
+    <section class="card hidden" id="convertPanel">
+      <div class="file-row">
+        <span class="file-name" id="fileName"></span>
+        <span class="file-meta" id="fileMeta"></span>
+        <button class="link" id="resetBtn">Сбросить</button>
+      </div>
+
+      <div class="quality hidden" id="qualityRow">
+        <label for="quality">Качество</label>
+        <input type="range" id="quality" min="1" max="100" value="90" />
+        <span id="qualityValue">90</span>
+      </div>
+
+      <div class="targets" id="targets"></div>
+
+      <button class="primary" id="convertBtn" disabled>Конвертировать</button>
+      <div class="status hidden" id="status"></div>
+    </section>
+
+    <section class="card hidden" id="resultPanel">
+      <p class="result-ok">Готово</p>
+      <p class="result-name" id="resultName"></p>
+      <a class="primary" id="downloadLink" download>Скачать файл</a>
+      <button class="link" id="againBtn">Конвертировать ещё</button>
+    </section>
+
+    <section class="card pdftools">
+      <h2>PDF-инструменты</h2>
+      <div class="tools">
+        <div class="tool">
+          <p class="tool-title">Объединить PDF</p>
+          <input type="file" id="mergeInput" multiple accept=".pdf" />
+          <button class="secondary" id="mergeBtn" disabled>Объединить</button>
+        </div>
+        <div class="tool">
+          <p class="tool-title">Разделить PDF</p>
+          <input type="file" id="splitInput" accept=".pdf" />
+          <input type="text" id="splitPages" placeholder="Страницы, напр. 1-3,5" />
+          <button class="secondary" id="splitBtn" disabled>Разделить</button>
+        </div>
+      </div>
+      <div class="status hidden" id="pdfStatus"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Конвертация выполняется локально на сервере. Файлы удаляются автоматически.
+  </footer>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
