@@ -18,7 +18,7 @@ export async function convertImage(req: ConvertRequest): Promise<ConvertResult> 
     case 'avif': pipeline = pipeline.avif({ quality }); break;
     case 'tiff': pipeline = pipeline.tiff({ compression: 'lzw' }); break;
     case 'gif': pipeline = pipeline.gif(); break;
-    default: throw new ConversionError(`Unsupported image target: ${req.target}`, 400);
+    default: throw new ConversionError('unsupportedImageTarget', { target: req.target }, 400);
   }
 
   await pipeline.toFile(outPath);

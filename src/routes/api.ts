@@ -7,6 +7,7 @@ import { uploadDir } from '../storage.js';
 import { config } from '../config.js';
 import { extOf, canonicalExt } from '../util.js';
 import { targetsFor, categoryOf, labelOf, mimeOf, CATEGORIES } from '../formats.js';
+import { langFrom, categoryLabels, actionLabel, errorMessage } from '../locales.js';
 import { detectCapabilities } from '../capabilities.js';
 import { dispatch } from '../engines/dispatch.js';
 import { ConversionError } from '../errors.js';
@@ -41,28 +42,34 @@ apiRouter.get('/health', (_req, res) => {
   res.json({ ok: true, capabilities: detectCapabilities() });
 });
 
-apiRouter.get('/formats', (_req, res) => {
-  res.json({ capabilities: detectCapabilities(), categories: CATEGORIES });
+apiRouter.get('/formats', (req, res) => {
+  const lang = langFrom(req.headers['accept-language']);
+  const labels = categoryLabels(lang);
+  res.json({
+    capabilities: detectCapabilities(),
+    categories: CATEGORIES.map((id) => ({ id, label: labels[id] })),
+  });
 });
 
 apiRouter.get('/targets', (req, res) => {
+  const lang = langFrom(req.headers['accept-language']);
   const from = canonicalExt(String(req.query.from ?? ''));
-  if (!from) return res.status(400).json({ error: 'Missing or empty "from" extension' });
+  if (!from) return res.status(400).json({ error: errorMessage('badFrom', lang), code: 'badFrom' });
   const { targets, action } = targetsFor(from);
   res.json({
     from,
     category: categoryOf(from),
     targets: targets.map((ext) => ({ ext, label: labelOf(ext), category: categoryOf(ext), mime: mimeOf(ext) })),
-    action: action ? { id: action, label: 'Extract contents' } : null,
+    action: action ? { id: action, label: actionLabel(lang) } : null,
   });
 });
 
 apiRouter.post('/convert', upload.single('file'), async (req, res, next) => {
   try {
     const file = req.file;
-    if (!file) throw new ConversionError('No file uploaded (field name must be "file")', 400);
+    if (!file) throw new ConversionError('noFile', {}, 400);
     const to = String(req.body.to ?? '').toLowerCase();
-    if (!to) throw new ConversionError('Missing "to" target format', 400);
+    if (!to) throw new ConversionError('missingTarget', {}, 400);
 
     const request: ConvertRequest = {
       filePath: file.path,

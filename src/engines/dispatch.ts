@@ -12,15 +12,15 @@ import type { ConvertRequest, ConvertResult } from '../types.js';
 type Caps = ReturnType<typeof detectCapabilities>;
 
 function requireFfmpeg(caps: Caps): void {
-  if (!caps.ffmpeg) throw new ConversionError('FFmpeg is not installed on the server', 503);
+  if (!caps.ffmpeg) throw new ConversionError('missingFfmpeg', {}, 503);
 }
 
 function requirePandoc(caps: Caps): void {
-  if (!caps.pandoc) throw new ConversionError('Pandoc is not installed on the server', 503);
+  if (!caps.pandoc) throw new ConversionError('missingPandoc', {}, 503);
 }
 
 function requireLibreoffice(caps: Caps): void {
-  if (!caps.libreoffice) throw new ConversionError('LibreOffice is not installed on the server', 503);
+  if (!caps.libreoffice) throw new ConversionError('missingLibreoffice', {}, 503);
 }
 
 export async function dispatch(req: ConvertRequest): Promise<ConvertResult> {
@@ -65,5 +65,5 @@ export async function dispatch(req: ConvertRequest): Promise<ConvertResult> {
   }
   if (req.ext === 'pdf' && (req.target === 'png' || req.target === 'txt')) return convertPdf(req);
 
-  throw new ConversionError(`Conversion from .${req.ext} to .${req.target} is not supported`, 400);
+  throw new ConversionError('unsupportedConversion', { ext: req.ext, target: req.target }, 400);
 }

@@ -108,7 +108,7 @@ export async function extractArchive(req: ConvertRequest): Promise<ConvertResult
       ? await tarEntriesFrom(req)
       : [await gzEntry(req)];
 
-  if (entries.length === 0) throw new ConversionError('Archive contains no files', 422);
+  if (entries.length === 0) throw new ConversionError('emptyArchive');
 
   if (entries.length === 1) {
     const e = entries[0];

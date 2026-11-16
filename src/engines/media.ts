@@ -42,7 +42,7 @@ export async function convertMedia(req: ConvertRequest): Promise<ConvertResult> 
   } else if ((VIDEO.includes(req.ext) || req.ext === 'gif') && VIDEO.includes(req.target)) {
     args.push(...VIDEO_ARGS[req.target]);
   } else {
-    throw new ConversionError(`Unsupported media conversion: ${req.ext} -> ${req.target}`, 400);
+    throw new ConversionError('unsupportedMediaConversion', { ext: req.ext, target: req.target }, 400);
   }
 
   args.push(outPath);

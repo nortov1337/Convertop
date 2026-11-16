@@ -49,6 +49,8 @@ The image already includes FFmpeg, Pandoc and LibreOffice.
 - `GET /api/targets?from=png` — list of target formats for an extension.
 - `POST /api/convert` — multipart: `file`, `to`, optionally `quality` (1–100). Returns the file.
 
+Labels and error messages are localized: send `Accept-Language: ru` (or `en`, the default) to get them in the chosen language.
+
 ## Environment variables
 
 | Variable | Default | Description |

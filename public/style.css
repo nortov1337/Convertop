@@ -129,6 +129,37 @@ body {
 
 .brand:hover .brand-mark { background: var(--accent-2); }
 
+.lang-switch {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.lang-btn {
+  border: none;
+  border-radius: 7px;
+  padding: 5px 9px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.lang-btn:hover { color: var(--text); }
+
+.lang-btn[aria-pressed="true"] {
+  color: #1c1510;
+  background: var(--accent);
+}
+
 /* ---------- layout ---------- */
 
 .container {

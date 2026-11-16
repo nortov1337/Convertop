@@ -1,19 +1,6 @@
 export type Category = 'image' | 'audio' | 'video' | 'document' | 'data' | 'archive' | 'pdf';
 
-export interface CategoryInfo {
-  id: string;
-  label: string;
-}
-
-export const CATEGORIES: CategoryInfo[] = [
-  { id: 'image', label: 'Images' },
-  { id: 'audio', label: 'Audio' },
-  { id: 'video', label: 'Video' },
-  { id: 'document', label: 'Documents' },
-  { id: 'data', label: 'Data' },
-  { id: 'archive', label: 'Archives' },
-  { id: 'pdf', label: 'PDF' },
-];
+export const CATEGORIES: Category[] = ['image', 'audio', 'video', 'document', 'data', 'archive', 'pdf'];
 
 export const IMAGE_FROM = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'avif', 'tiff', 'svg'];
 export const IMAGE_TO = ['png', 'jpg', 'webp', 'gif', 'avif', 'tiff'];

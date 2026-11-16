@@ -12,7 +12,7 @@ import type { ConvertRequest, ConvertResult } from '../types.js';
 export async function convertPdf(req: ConvertRequest): Promise<ConvertResult> {
   if (req.target === 'png') return toPng(req);
   if (req.target === 'txt') return toTxt(req);
-  throw new ConversionError(`Unsupported PDF target: ${req.target}`, 400);
+  throw new ConversionError('unsupportedPdfTarget', { target: req.target }, 400);
 }
 
 async function toPng(req: ConvertRequest): Promise<ConvertResult> {
@@ -21,7 +21,7 @@ async function toPng(req: ConvertRequest): Promise<ConvertResult> {
     .filter((p) => p.kind === 'content' && p.content)
     .map((p) => p.content as Buffer);
 
-  if (buffers.length === 0) throw new ConversionError('PDF produced no pages', 422);
+  if (buffers.length === 0) throw new ConversionError('emptyPdf');
 
   if (buffers.length === 1) {
     const outPath = path.join(outputDir, tempName('png'));
