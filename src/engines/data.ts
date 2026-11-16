@@ -19,6 +19,10 @@ function csvToTable(text: string): Table {
   return { header: grid[0], rows: grid.slice(1) };
 }
 
+function syntheticHeader(count: number): string[] {
+  return Array.from({ length: count }, (_, i) => `col${i + 1}`);
+}
+
 function jsonToTable(text: string): Table {
   const data = JSON.parse(text);
   if (Array.isArray(data)) {
@@ -29,14 +33,18 @@ function jsonToTable(text: string): Table {
       const rows = data.map((o) => header.map((k) => (o as Record<string, unknown>)[k]));
       return { header, rows };
     }
-    if (Array.isArray(first)) return { header: [], rows: data as unknown[][] };
-    return { header: [], rows: data.map((v) => [v]) };
+    if (Array.isArray(first)) {
+      const rows = data as unknown[][];
+      const width = rows.reduce((max, r) => Math.max(max, Array.isArray(r) ? r.length : 1), 0);
+      return { header: syntheticHeader(width), rows };
+    }
+    return { header: syntheticHeader(1), rows: data.map((v) => [v]) };
   }
   if (data && typeof data === 'object' && !Array.isArray(data)) {
     const header = Object.keys(data);
     return { header, rows: [header.map((k) => (data as Record<string, unknown>)[k])] };
   }
-  return { header: [], rows: [[data]] };
+  return { header: syntheticHeader(1), rows: [[data]] };
 }
 
 async function xlsxToTable(buffer: Buffer): Promise<Table> {
