@@ -26,7 +26,10 @@ function requireLibreoffice(caps: Caps): void {
 export async function dispatch(req: ConvertRequest): Promise<ConvertResult> {
   const caps = detectCapabilities();
 
-  if (req.target === 'extract') return extractArchive(req);
+  if (req.target === 'extract') {
+    if (!ARCHIVE.includes(req.ext)) throw new ConversionError('unsupportedConversion', { ext: req.ext, target: req.target }, 400);
+    return extractArchive(req);
+  }
   if (ARCHIVE.includes(req.target)) return compressToArchive(req);
 
   if (IMAGE_FROM.includes(req.ext) && IMAGE_TO.includes(req.target)) return convertImage(req);

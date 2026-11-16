@@ -1,12 +1,13 @@
 import { promises as fsp, createReadStream, createWriteStream } from 'node:fs';
 import path from 'node:path';
 import { createGzip, createGunzip } from 'node:zlib';
-import { Writable } from 'node:stream';
+import { Readable, Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import archiver from 'archiver';
 import unzipper from 'unzipper';
 import * as tar from 'tar-stream';
 import { outputDir } from '../storage.js';
+import { config } from '../config.js';
 import { tempName, baseName, extOf } from '../util.js';
 import { mimeOf } from '../formats.js';
 import { ConversionError } from '../errors.js';
@@ -15,6 +16,46 @@ import type { ConvertRequest, ConvertResult } from '../types.js';
 export interface ArchiveEntry {
   name: string;
   buffer: Buffer;
+}
+
+interface ExtractBudget {
+  bytesLeft: number;
+  entriesLeft: number;
+}
+
+function createBudget(): ExtractBudget {
+  return { bytesLeft: config.maxExtractBytes, entriesLeft: config.maxExtractEntries };
+}
+
+function takeEntry(budget: ExtractBudget): void {
+  if (--budget.entriesLeft < 0) throw new ConversionError('archiveTooLarge', {}, 413);
+}
+
+function safeEntryName(name: string): string {
+  const parts = path.posix
+    .normalize(name.replace(/\\/g, '/').replace(/^[a-zA-Z]:/, ''))
+    .split('/')
+    .filter((part) => part && part !== '.' && part !== '..');
+  return parts.join('/') || 'file';
+}
+
+async function collectCapped(readable: Readable, budget: ExtractBudget): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  let size = 0;
+  const sink = new Writable({
+    write(chunk: Buffer, _enc, cb) {
+      size += chunk.length;
+      if (size > budget.bytesLeft) {
+        cb(new ConversionError('archiveTooLarge', {}, 413));
+        return;
+      }
+      chunks.push(chunk);
+      cb();
+    },
+  });
+  await pipeline(readable, sink);
+  budget.bytesLeft -= size;
+  return Buffer.concat(chunks);
 }
 
 export async function zipEntries(entries: ArchiveEntry[], outPath: string): Promise<void> {
@@ -43,7 +84,7 @@ export async function compressToArchive(req: ConvertRequest): Promise<ConvertRes
       archive.on('error', reject);
     });
     archive.pipe(ws);
-    archive.file(req.filePath, { name: req.filename });
+    archive.file(req.filePath, { name: safeEntryName(req.filename) });
     await archive.finalize();
     await done;
     return { filePath: outPath, filename: `${baseName(req.filename)}.${req.target}`, mime: mimeOf(req.target) };
@@ -56,31 +97,52 @@ export async function compressToArchive(req: ConvertRequest): Promise<ConvertRes
 
 async function zipEntriesFrom(req: ConvertRequest): Promise<ArchiveEntry[]> {
   const dir = await unzipper.Open.file(req.filePath);
+  const budget = createBudget();
   const entries: ArchiveEntry[] = [];
   for (const f of dir.files) {
     if (f.type !== 'File') continue;
-    entries.push({ name: f.path, buffer: await f.buffer() });
+    takeEntry(budget);
+    entries.push({ name: safeEntryName(f.path), buffer: await collectCapped(f.stream() as Readable, budget) });
   }
   return entries;
 }
 
 async function tarEntriesFrom(req: ConvertRequest): Promise<ArchiveEntry[]> {
+  const budget = createBudget();
   const entries: ArchiveEntry[] = [];
   await new Promise<void>((resolve, reject) => {
     const extract = tar.extract();
     extract.on('entry', (header, stream, next) => {
-      if (header.type === 'file') {
-        const chunks: Buffer[] = [];
-        stream.on('data', (c: unknown) => chunks.push(c as Buffer));
-        stream.on('end', () => {
-          entries.push({ name: header.name, buffer: Buffer.concat(chunks) });
-          next();
-        });
-        stream.on('error', next);
-      } else {
+      if (header.type !== 'file') {
         stream.on('end', next);
         stream.resume();
+        return;
       }
+      const fail = (err: unknown) => {
+        extract.destroy();
+        reject(err);
+      };
+      try {
+        takeEntry(budget);
+      } catch (err) {
+        stream.resume();
+        fail(err);
+        return;
+      }
+      const chunks: Buffer[] = [];
+      let size = 0;
+      stream.on('data', (chunk: unknown) => {
+        const buf = chunk as Buffer;
+        size += buf.length;
+        if (size > budget.bytesLeft) fail(new ConversionError('archiveTooLarge', {}, 413));
+        else chunks.push(buf);
+      });
+      stream.on('end', () => {
+        budget.bytesLeft -= size;
+        entries.push({ name: safeEntryName(header.name), buffer: Buffer.concat(chunks) });
+        next();
+      });
+      stream.on('error', fail);
     });
     extract.on('finish', () => resolve());
     extract.on('error', reject);
@@ -90,15 +152,8 @@ async function tarEntriesFrom(req: ConvertRequest): Promise<ArchiveEntry[]> {
 }
 
 async function gzEntry(req: ConvertRequest): Promise<ArchiveEntry> {
-  const chunks: Buffer[] = [];
-  const sink = new Writable({
-    write(chunk: Buffer, _enc, cb) {
-      chunks.push(chunk);
-      cb();
-    },
-  });
-  await pipeline(createReadStream(req.filePath), createGunzip(), sink);
-  return { name: baseName(req.filename), buffer: Buffer.concat(chunks) };
+  const buffer = await collectCapped(createReadStream(req.filePath).pipe(createGunzip()), createBudget());
+  return { name: baseName(req.filename), buffer };
 }
 
 export async function extractArchive(req: ConvertRequest): Promise<ConvertResult> {

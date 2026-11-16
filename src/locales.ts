@@ -17,6 +17,7 @@ export type ErrorCode =
   | 'unsupportedPdfTarget'
   | 'emptyPdf'
   | 'emptyArchive'
+  | 'archiveTooLarge'
   | 'missingFfmpeg'
   | 'missingPandoc'
   | 'missingLibreoffice'
@@ -61,6 +62,7 @@ const MESSAGES: Record<Lang, Record<ErrorCode, string>> = {
     unsupportedPdfTarget: 'Unsupported PDF target: {target}',
     emptyPdf: 'PDF produced no pages',
     emptyArchive: 'Archive contains no files',
+    archiveTooLarge: 'Archive expands beyond the safe size limit',
     missingFfmpeg: 'FFmpeg is not installed on the server',
     missingPandoc: 'Pandoc is not installed on the server',
     missingLibreoffice: 'LibreOffice is not installed on the server',
@@ -78,6 +80,7 @@ const MESSAGES: Record<Lang, Record<ErrorCode, string>> = {
     unsupportedPdfTarget: 'Неподдерживаемый формат для PDF: {target}',
     emptyPdf: 'PDF не содержит страниц',
     emptyArchive: 'Архив не содержит файлов',
+    archiveTooLarge: 'Архив при распаковке превышает допустимый размер',
     missingFfmpeg: 'FFmpeg не установлен на сервере',
     missingPandoc: 'Pandoc не установлен на сервере',
     missingLibreoffice: 'LibreOffice не установлен на сервере',
