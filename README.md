@@ -12,7 +12,7 @@
 | Документы | DOCX, HTML, MD, TXT, RTF, ODT, EPUB, PDF | Pandoc + LibreOffice |
 | Данные | CSV, JSON, XLSX | exceljs / csv |
 | Архивы | ZIP, TAR, GZ (упаковка и извлечение) | archiver / unzipper / tar-stream |
-| PDF | → PNG, TXT; объединение и разделение страниц | pdf-to-png-converter / unpdf / pdf-lib |
+| PDF | → PNG, TXT, DOCX | pdf-to-png-converter / unpdf / LibreOffice |
 
 ## Запуск
 
@@ -48,8 +48,6 @@ docker run -p 3000:3000 convertop
 - `GET /api/formats` — категории форматов.
 - `GET /api/targets?from=png` — список целевых форматов для расширения.
 - `POST /api/convert` — multipart: `file`, `to`, опционально `quality` (1–100). Возвращает файл.
-- `POST /api/pdf/merge` — multipart: `files[]` (≥2). Возвращает PDF.
-- `POST /api/pdf/split` — multipart: `file`, опционально `pages` (`1-3,5`). Возвращает ZIP.
 
 ## Переменные окружения
 

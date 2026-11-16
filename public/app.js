@@ -17,13 +17,6 @@ const els = {
   resultName: $('#resultName'),
   downloadLink: $('#downloadLink'),
   againBtn: $('#againBtn'),
-  engines: $('#engines'),
-  mergeInput: $('#mergeInput'),
-  mergeBtn: $('#mergeBtn'),
-  splitInput: $('#splitInput'),
-  splitPages: $('#splitPages'),
-  splitBtn: $('#splitBtn'),
-  pdfStatus: $('#pdfStatus'),
 };
 
 const MEDIA_CATEGORIES = new Set(['image', 'audio', 'video']);
@@ -55,21 +48,9 @@ async function boot() {
     const res = await fetch('/api/formats');
     const data = await res.json();
     categoryLabels = Object.fromEntries((data.categories ?? []).map((c) => [c.id, c.label]));
-    renderEngines(data.capabilities);
   } catch {
     setStatus(els.status, 'Не удалось связаться с сервером', true);
   }
-}
-
-function renderEngines(caps) {
-  const items = [
-    ['FFmpeg (аудио/видео)', caps?.ffmpeg],
-    ['Pandoc (документы)', caps?.pandoc],
-    ['LibreOffice (PDF)', caps?.libreoffice],
-  ];
-  els.engines.innerHTML = items
-    .map(([name, on]) => `<span class="badge ${on ? 'on' : 'off'}">${name}</span>`)
-    .join('');
 }
 
 function selectFile(file) {
@@ -122,7 +103,8 @@ function renderTargets(data) {
 
   els.targets.innerHTML = buttons.join('');
 
-  els.targets.querySelectorAll('.target-btn').forEach((btn) => {
+  els.targets.querySelectorAll('.target-btn').forEach((btn, i) => {
+    btn.style.animationDelay = `${i * 24}ms`;
     btn.addEventListener('click', () => {
       els.targets.querySelectorAll('.target-btn').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
@@ -137,8 +119,10 @@ function renderTargets(data) {
 async function convert() {
   if (!currentFile || !currentTarget) return;
   els.convertBtn.disabled = true;
+  els.convertBtn.classList.add('loading');
+  els.convertBtn.querySelector('.btn-label').textContent = 'Конвертация…';
   els.status.classList.remove('hidden');
-  setStatus(els.status, 'Конвертация…');
+  setStatus(els.status, 'Обработка файла…');
 
   const form = new FormData();
   form.append('file', currentFile);
@@ -165,6 +149,8 @@ async function convert() {
     setStatus(els.status, err.message, true);
   } finally {
     els.convertBtn.disabled = false;
+    els.convertBtn.classList.remove('loading');
+    els.convertBtn.querySelector('.btn-label').textContent = 'Конвертировать';
   }
 }
 
@@ -181,32 +167,6 @@ function reset() {
   els.fileInput.value = '';
   els.convertPanel.classList.add('hidden');
   els.resultPanel.classList.add('hidden');
-}
-
-async function downloadRequest(url, form, btn, statusEl) {
-  btn.disabled = true;
-  statusEl.classList.remove('hidden');
-  setStatus(statusEl, 'Обработка…');
-  try {
-    const res = await fetch(url, { method: 'POST', body: form });
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new Error(data.error || `Ошибка ${res.status}`);
-    }
-    const blob = await res.blob();
-    const name = filenameFromHeader(res) || 'result';
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setStatus(statusEl, 'Готово');
-  } catch (err) {
-    setStatus(statusEl, err.message, true);
-  } finally {
-    btn.disabled = false;
-  }
 }
 
 function wireEvents() {
@@ -229,25 +189,6 @@ function wireEvents() {
   els.againBtn.addEventListener('click', reset);
   els.quality.addEventListener('input', () => {
     els.qualityValue.textContent = els.quality.value;
-  });
-
-  els.mergeInput.addEventListener('change', () => {
-    els.mergeBtn.disabled = els.mergeInput.files.length < 2;
-  });
-  els.mergeBtn.addEventListener('click', () => {
-    const form = new FormData();
-    for (const f of els.mergeInput.files) form.append('files', f);
-    downloadRequest('/api/pdf/merge', form, els.mergeBtn, els.pdfStatus);
-  });
-
-  els.splitInput.addEventListener('change', () => {
-    els.splitBtn.disabled = !els.splitInput.files[0];
-  });
-  els.splitBtn.addEventListener('click', () => {
-    const form = new FormData();
-    form.append('file', els.splitInput.files[0]);
-    if (els.splitPages.value.trim()) form.append('pages', els.splitPages.value.trim());
-    downloadRequest('/api/pdf/split', form, els.splitBtn, els.pdfStatus);
   });
 }
 
